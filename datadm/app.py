@@ -272,6 +272,10 @@ with gr.Blocks(
     clear.click(lambda: (None, []), None, outputs=[chatbot, conversation], queue=False)
 
 
-if __name__ == "__main__":
+def main():
     demo.queue(max_size=128, concurrency_count=1)
     demo.launch(share=False)
+
+
+if __name__ == "__main__":
+    main()
