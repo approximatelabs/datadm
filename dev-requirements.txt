@@ -1,0 +1,8 @@
+pytest
+tox
+isort
+black
+flake8
+pytest-asyncio
+pytest-mock
+jurigged

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "datadm"
+description = "Chat with your data, personal data assistant, keep your data private with pure local mode, slide into your data's DMs"
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = ["nlp", "ai", "data", "chatbot", "database", "csv", "analytics", "datachat", "datadm"]
+license = {file = "LICENSE"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "accelerate",
+    "gradio",
+    "guidance",
+    "jupyter",
+    "matplotlib",
+    "pandas",
+    "sketch",
+    "transformers",
+]
+urls = {homepage = "https://github.com/approximatelabs/datadm"}
+dynamic = ["version"]
+
+[project.scripts]
+datadm = "datadm:app"
+
+[tool.setuptools_scm]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py37, py38, py39, py310, py311
+
+[gh-actions]
+python =
+    3.7: py37
+    3.8: py38
+    3.9: py39
+    3.10: py310
+    3.11: py311
+
+[testenv]
+deps= -rdev-requirements.txt
+commands = python -m pytest tests
+"""
