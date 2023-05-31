@@ -34,7 +34,6 @@ class REPL:
         )
         self.kernel_pid = kernel_process.pid
         atexit.register(lambda: os.kill(self.kernel_pid, signal.SIGKILL))
-        atexit.register(lambda: os.remove(self.conn_file.name))
         atexit.register(self.runtime_dir.cleanup)
         self.kc = self.connect()
     
@@ -67,7 +66,6 @@ class REPL:
 
     def restore(self):
         self.kc.stop_channels()
-        print(f"kill {self.kernel_pid}")
         # TODO: fix this?
         os.kill(self.kernel_pid, signal.SIGTERM)
         time.sleep(10)
@@ -96,6 +94,7 @@ class REPL:
         else:
             raise RuntimeError('Kernel did not start')
         self.kc = kc
+        time.sleep(0.5)  # sleep to let things settle...
         return kc
 
     def exec(self, code, timeout=10):

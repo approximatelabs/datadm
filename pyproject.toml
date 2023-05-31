@@ -33,11 +33,10 @@ datadm = "datadm:app"
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py37, py38, py39, py310, py311
+envlist = py38, py39, py310, py311
 
 [gh-actions]
 python =
-    3.7: py37
     3.8: py38
     3.9: py39
     3.10: py310
@@ -45,5 +44,5 @@ python =
 
 [testenv]
 deps= -rdev-requirements.txt
-commands = python -m pytest tests
+commands = python -m pytest tests -s
 """
