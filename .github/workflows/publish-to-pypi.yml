@@ -1,4 +1,4 @@
-name: Publish Python 🐍 distributions 📦 to PyPI
+name: Publish to PyPI and ghcr
 
 env:
   REGISTRY: ghcr.io
@@ -55,7 +55,7 @@ jobs:
         password: ${{ secrets.PYPI_API_TOKEN }}
   build-and-push-image:
     runs-on: ubuntu-latest
-    # needs: [build-n-publish]
+    needs: [build-n-publish]
     permissions:
       contents: read
       packages: write
