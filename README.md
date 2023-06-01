@@ -11,5 +11,5 @@ Fill this all out
 pip install -r dev-requirements.txt
 pip install -e .
 
-jurigged -v datadm/app
+jurigged -v datadm/app.py
 ```

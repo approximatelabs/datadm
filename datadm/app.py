@@ -140,6 +140,8 @@ def user(message, history, conversation):
     return "", history + [[message, None]], conversation + [{'role': 'user', 'content': message}]
 
 def bot(repl, conversation):
+    if llm is None:
+        return conversation_list_to_history(conversation + [{'role': 'assistant', 'content': 'Please load model...'}]), conversation
     starting_convo = conversation
 
     tries = 0
@@ -203,8 +205,42 @@ def setup_repl():
     return repl
 
 
-llm = StarcoderChat()
+# llm = StarcoderChat()
 
+
+class BackendLLMManager():
+    def __init__(self):
+        # state machine [unloaded, loading, ready, error]
+        self.llms = {
+            'starcoderchat-cuda': {'state': 'unloaded', 'llm': None},
+            'starcoderchat-cpu': {'state': 'unloaded', 'llm': None},
+            'openai-gpt-3.5': {'state': 'unloaded', 'llm': None},
+            'openai-gpt-4': {'state': 'unloaded', 'llm': None},
+        }
+        self.selected = 'starcoderchat-cuda'
+    
+    def load(self, llm_name):
+        # create a background thread to load the llm
+        if self.llms[llm_name]['state'] == 'unloaded':
+            match llm_name:
+                case 'starcoderchat-cuda':
+                    self.llms[llm_name]['state'] = 'loading'
+                    self.llms[llm_name]['llm'] = StarcoderChat()
+                    self.llms[llm_name]['state'] = 'ready'
+                case _:
+                    print(f"LLM {llm_name} not found")
+    
+    def unload(self, llm_name):
+        if llm_name in self.llms:
+            self.llms[llm_name]['state'] = 'unloaded'
+            self.llms[llm_name]['llm'] = None
+
+    def header_repr(self):
+        # return current model and current model status
+        print(self)
+        return f"Current Model: {self.selected} ({self.llms[self.selected]['state']})"
+
+llm_manager = BackendLLMManager()
 temp_image_dir = tempfile.TemporaryDirectory()
 atexit.register(temp_image_dir.cleanup)
 
@@ -217,24 +253,53 @@ with gr.Blocks(
     dataframes = gr.State({})
     conversation = gr.State([])
     repl = gr.State(None)
-    chatbot = gr.Chatbot(every=0.2).style(height=600)
-    gr.Markdown("# Welcome to DataDM!")
+    # llm_state = gr.State("")
     with gr.Row():
-        with gr.Column():
-            msg = gr.Textbox(
-                label="Chat Message Box",
-                placeholder="Chat Message Box",
-                show_label=False,
-            ).style(container=False)
-        with gr.Column():
+        with gr.Column(scale=1):
+            gr.Markdown("# Welcome to DataDM!")
+        with gr.Column(scale=1):
             with gr.Row():
-                submit = gr.Button("Submit")
-                stop = gr.Button("Stop")
-                clear = gr.Button("Clear")
+                model_selection = gr.Dropdown(
+                    choices=list(llm_manager.llms.keys()),
+                    value=llm_manager.selected,
+                    label="model",
+                    multiselect=False,
+                    show_label=False,
+                    interactive=True)
+            gr.HTML(lambda: llm_manager.llms[model_selection.value]['state'], every=2)
+            load_model = gr.Button("Load Model", visible=llm_manager.llms[llm_manager.selected]['state'] != 'loaded')
+    # with gr.Row():
+    #     with gr.Column(s0cale=3):
+            
+    #     with gr.Column(scale=1):
+    #         model = gr.Dropdown(choices=["HuggingFaceH4/starchat-alpha", "OpenAI-gpt-3.5"], label="model")
     with gr.Row():
-        # add upload button 
-        upload = gr.UploadButton(label="Upload CSV")  # , file_count="multiple")
+        with gr.Column(scale=5):
+            chatbot = gr.Chatbot().style(height=600)
+        with gr.Column(scale=1):
+            gr.Markdown("## Data")
+    with gr.Row():
+        with gr.Column(scale=5):
+            with gr.Row():
+                with gr.Column():
+                    msg = gr.Textbox(
+                        label="Chat Message Box",
+                        placeholder="Chat Message Box",
+                        show_label=False,
+                    ).style(container=False)
+                with gr.Column():
+                    with gr.Row():
+                        submit = gr.Button("Submit")
+                        stop = gr.Button("Stop")
+                        clear = gr.Button("Clear")
+        with gr.Column(scale=1):
+            upload = gr.UploadButton(label="Upload CSV")
     demo.load(setup_repl, None, repl)
+    load_model.click(
+        fn=llm_manager.load,
+        inputs=[model_selection],
+        outputs=[],
+    )
     upload_event = upload.upload(
         fn=add_data,
         inputs=[upload, repl, conversation],
@@ -271,9 +336,10 @@ with gr.Blocks(
     )
     clear.click(lambda: (None, []), None, outputs=[chatbot, conversation], queue=False)
 
+demo.queue(max_size=128, concurrency_count=1)
 
 def main():
-    demo.queue(max_size=128, concurrency_count=1)
+    
     demo.launch(share=False)
 
 
