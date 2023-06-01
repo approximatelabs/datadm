@@ -139,9 +139,48 @@ def user(message, history, conversation):
     # Append the user's message to the conversation history
     return "", history + [[message, None]], conversation + [{'role': 'user', 'content': message}]
 
-def bot(repl, conversation):
+
+class BackendLLMManager():
+    def __init__(self):
+        # state machine [unloaded, loading, ready, error]
+        self.llms = {
+            'starcoderchat-cuda': {'state': 'unloaded', 'llm': None},
+            'starcoderchat-cpu': {'state': 'unloaded', 'llm': None},
+            'openai-gpt-3.5': {'state': 'unloaded', 'llm': None},
+            'openai-gpt-4': {'state': 'unloaded', 'llm': None},
+        }
+    
+    def load(self, llm_name):
+        # create a background thread to load the llm
+        if self.llms[llm_name]['state'] == 'unloaded':
+            match llm_name:
+                case 'starcoderchat-cuda':
+                    self.llms[llm_name]['state'] = 'loading'
+                    self.llms[llm_name]['llm'] = StarcoderChat()
+                    self.llms[llm_name]['state'] = 'ready'
+                case _:
+                    print(f"LLM {llm_name} not found")
+        return self.model_status(llm_name)
+    
+    def unload(self, llm_name):
+        if llm_name in self.llms:
+            self.llms[llm_name]['state'] = 'unloaded'
+            self.llms[llm_name]['llm'] = None
+
+    def model_status(self, llm_name):
+        state = self.llms[llm_name]['state']
+        update = gr.Button.update(visible = state != 'ready')
+        return [(llm_name, state)], update
+
+llm_manager = BackendLLMManager()
+
+
+def bot(repl, conversation, model_selection=None):
+    llm = llm_manager.llms.get(model_selection, {}).get('llm')
+    print(llm)
     if llm is None:
-        return conversation_list_to_history(conversation + [{'role': 'assistant', 'content': 'Please load model...'}]), conversation
+        yield conversation_list_to_history(conversation + [{'role': 'assistant', 'content': 'Please select and load a model'}]), conversation
+        return
     starting_convo = conversation
 
     tries = 0
@@ -207,76 +246,40 @@ def setup_repl():
 
 # llm = StarcoderChat()
 
-
-class BackendLLMManager():
-    def __init__(self):
-        # state machine [unloaded, loading, ready, error]
-        self.llms = {
-            'starcoderchat-cuda': {'state': 'unloaded', 'llm': None},
-            'starcoderchat-cpu': {'state': 'unloaded', 'llm': None},
-            'openai-gpt-3.5': {'state': 'unloaded', 'llm': None},
-            'openai-gpt-4': {'state': 'unloaded', 'llm': None},
-        }
-        self.selected = 'starcoderchat-cuda'
-    
-    def load(self, llm_name):
-        # create a background thread to load the llm
-        if self.llms[llm_name]['state'] == 'unloaded':
-            match llm_name:
-                case 'starcoderchat-cuda':
-                    self.llms[llm_name]['state'] = 'loading'
-                    self.llms[llm_name]['llm'] = StarcoderChat()
-                    self.llms[llm_name]['state'] = 'ready'
-                case _:
-                    print(f"LLM {llm_name} not found")
-    
-    def unload(self, llm_name):
-        if llm_name in self.llms:
-            self.llms[llm_name]['state'] = 'unloaded'
-            self.llms[llm_name]['llm'] = None
-
-    def header_repr(self):
-        # return current model and current model status
-        print(self)
-        return f"Current Model: {self.selected} ({self.llms[self.selected]['state']})"
-
-llm_manager = BackendLLMManager()
 temp_image_dir = tempfile.TemporaryDirectory()
 atexit.register(temp_image_dir.cleanup)
 
+import time
+
+css = """
+footer {display: none !important;}
+.gradio-container {min-height: 0px !important;}
+.disclaimer {font-variant-caps: all-small-caps;}
+"""
 
 with gr.Blocks(
     theme=gr.themes.Soft(),
-    css=".disclaimer {font-variant-caps: all-small-caps;}",
+    css=css,
     analytics_enabled=False,
 ) as demo:
     dataframes = gr.State({})
     conversation = gr.State([])
     repl = gr.State(None)
-    # llm_state = gr.State("")
     with gr.Row():
-        with gr.Column(scale=1):
+        with gr.Column(scale=5):
             gr.Markdown("# Welcome to DataDM!")
+            chatbot = gr.Chatbot().style(height=600)
         with gr.Column(scale=1):
             with gr.Row():
                 model_selection = gr.Dropdown(
                     choices=list(llm_manager.llms.keys()),
-                    value=llm_manager.selected,
+                    value="starcoderchat-cuda",
                     label="model",
                     multiselect=False,
                     show_label=False,
                     interactive=True)
-            gr.HTML(lambda: llm_manager.llms[model_selection.value]['state'], every=2)
-            load_model = gr.Button("Load Model", visible=llm_manager.llms[llm_manager.selected]['state'] != 'loaded')
-    # with gr.Row():
-    #     with gr.Column(s0cale=3):
-            
-    #     with gr.Column(scale=1):
-    #         model = gr.Dropdown(choices=["HuggingFaceH4/starchat-alpha", "OpenAI-gpt-3.5"], label="model")
-    with gr.Row():
-        with gr.Column(scale=5):
-            chatbot = gr.Chatbot().style(height=600)
-        with gr.Column(scale=1):
+                model_state = gr.HighlightedText(label=False)
+            load_model = gr.Button("Load Model", visible=lambda: llm_manager.llms[llm_manager.selected]['state'] != 'loaded')
             gr.Markdown("## Data")
     with gr.Row():
         with gr.Column(scale=5):
@@ -295,10 +298,16 @@ with gr.Blocks(
         with gr.Column(scale=1):
             upload = gr.UploadButton(label="Upload CSV")
     demo.load(setup_repl, None, repl)
-    load_model.click(
-        fn=llm_manager.load,
+    demo.load(llm_manager.model_status, model_selection, outputs=[model_state, load_model])
+    model_selection.change(
+        lambda x: (x, *llm_manager.model_status(x)),
         inputs=[model_selection],
-        outputs=[],
+        outputs=[model_selection, model_state, load_model],
+    )
+    load_model.click(
+        llm_manager.load,
+        inputs=[model_selection],
+        outputs=[model_state, load_model],
     )
     upload_event = upload.upload(
         fn=add_data,
@@ -312,8 +321,8 @@ with gr.Blocks(
         queue=False,
     ).then(
         fn=bot,
-        inputs=[repl, conversation],
-        outputs=[chatbot, conversation],
+        inputs=[repl, conversation, model_selection],
+        outputs=[chatbot, conversation,],
         queue=True,
     )
     submit_click_event = submit.click(
@@ -323,7 +332,7 @@ with gr.Blocks(
         queue=False,
     ).then(
         fn=bot,
-        inputs=[repl, conversation],
+        inputs=[repl, conversation, model_selection],
         outputs=[chatbot, conversation],
         queue=True,
     )
