@@ -94,7 +94,7 @@ class REPL:
         else:
             raise RuntimeError('Kernel did not start')
         self.kc = kc
-        time.sleep(0.5)  # sleep to let things settle...
+        self.kc.wait_for_ready(timeout=5)
         return kc
 
     def exec(self, code, timeout=10):
