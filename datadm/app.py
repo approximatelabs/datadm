@@ -177,7 +177,6 @@ llm_manager = BackendLLMManager()
 
 def bot(repl, conversation, model_selection=None):
     llm = llm_manager.llms.get(model_selection, {}).get('llm')
-    print(llm)
     if llm is None:
         yield conversation_list_to_history(conversation + [{'role': 'assistant', 'content': 'Please select and load a model'}]), conversation
         return
@@ -236,6 +235,7 @@ def add_data(file, repl, conversation):
     conversation.append({'role': 'assistant', 'content': f"Loading the data...\n```python\n{varname} = pd.read_csv('{basename}')\n```\n-SUMMARY-\n```\n{datasummary}\n```\n{result}"})
     return conversation_list_to_history(conversation), conversation
 
+
 def setup_repl():
     repl = REPL()
     repl.exec('import pandas as pd')
@@ -257,14 +257,29 @@ footer {display: none !important;}
 .disclaimer {font-variant-caps: all-small-caps;}
 """
 
+def get_downloads(repl):
+    frames = repl.dataframes_as_csvs()
+    result = []
+    for frame in frames:
+        result.append(
+            gr.File.update(
+                value = frame['csv'],
+                label = f"{frame['name']} ({frame['rows']} rows, {len(frame['columns'])} cols)",
+                visible=True,
+            )
+        )
+    while len(result) < 10:
+        result.append(gr.File.update(visible=False))
+    return result
+
 with gr.Blocks(
     theme=gr.themes.Soft(),
     css=css,
     analytics_enabled=False,
 ) as demo:
-    dataframes = gr.State({})
     conversation = gr.State([])
     repl = gr.State(None)
+    files = []
     with gr.Row():
         with gr.Column(scale=5):
             gr.Markdown("# Welcome to DataDM!")
@@ -280,7 +295,9 @@ with gr.Blocks(
                     interactive=True)
                 model_state = gr.HighlightedText(label=False)
             load_model = gr.Button("Load Model", visible=lambda: llm_manager.llms[llm_manager.selected]['state'] != 'loaded')
-            gr.Markdown("## Data")
+            for _ in range(10):
+                f = gr.File("README.md", visible=False)
+                files.append(f)
     with gr.Row():
         with gr.Column(scale=5):
             with gr.Row():
@@ -313,6 +330,10 @@ with gr.Blocks(
         fn=add_data,
         inputs=[upload, repl, conversation],
         outputs=[chatbot, conversation]
+    ).then(
+        fn=get_downloads,
+        inputs=[repl],
+        outputs=files,
     )
     submit_event = msg.submit(
         fn=user,
@@ -322,8 +343,12 @@ with gr.Blocks(
     ).then(
         fn=bot,
         inputs=[repl, conversation, model_selection],
-        outputs=[chatbot, conversation,],
+        outputs=[chatbot, conversation],
         queue=True,
+    ).then(
+        fn=get_downloads,
+        inputs=[repl],
+        outputs=files,
     )
     submit_click_event = submit.click(
         fn=user,
@@ -335,6 +360,10 @@ with gr.Blocks(
         inputs=[repl, conversation, model_selection],
         outputs=[chatbot, conversation],
         queue=True,
+    ).then(
+        fn=get_downloads,
+        inputs=[repl],
+        outputs=files,
     )
     stop.click(
         fn=None,
