@@ -9,11 +9,6 @@ from datadm.conversation import conversation_list_to_history
 
 dotenv.load_dotenv()
 
-css = """
-footer {display: none !important;}
-.gradio-container {min-height: 0px !important;}
-.disclaimer {font-variant-caps: all-small-caps;}
-"""
 
 def get_downloads(repl):
     frames = repl.dataframes_as_csvs()
@@ -64,6 +59,13 @@ def setup_repl():
     repl.exec('import matplotlib.pyplot as plt')
     return repl
 
+css = """
+footer {display: none !important;}
+.gradio-container {min-height: 0px !important;}
+.disclaimer {font-variant-caps: all-small-caps;}
+.chatbox {flex-grow: 1;}
+.fullheight {height: 90vh;}
+"""
 
 with gr.Blocks(
     theme=gr.themes.Soft(),
@@ -75,8 +77,8 @@ with gr.Blocks(
     files = []
     gr.Markdown("# Welcome to DataDM!")
     with gr.Row():
-        with gr.Column(scale=5):
-            chatbot = gr.Chatbot().style(height=600)
+        with gr.Column(scale=5, elem_classes="fullheight"):
+            chatbot = gr.Chatbot(elem_classes="chatbox", label="datadm")
             with gr.Row():
                 with gr.Column():
                     msg = gr.Textbox(

@@ -13,6 +13,8 @@ DataDM is your private data assistant. A conversational interface for your data 
 
 [ recorded demo video here ]
 
+Note: Demo above is `GPT-4`, which sends the conversation to OpenAI's API. To use in full local mode, be sure to select `starcoderchat-cuda` as the model. This will use the StarChat model, which is a bit less capable but runs entirely locally.
+
 ## Features
 - [x] Persistent Juptyer kernel backend for data manipulation during conversation
 - [x] Run entirely locally, keeping your data private
@@ -20,7 +22,10 @@ DataDM is your private data assistant. A conversational interface for your data 
 - [x] Easy to use docker-images for one-line deployment
 - [x] Load multiple tables directly into the chat
 - [x] Option to use OpenAI's GPT-3.5 or GPT-4 (requires API key)
-- [ ] [WIP] GGML based mode (CPU only, no GPU required) [/WIP]
+- [ ] WIP: GGML based mode (CPU only, no GPU required)
+- [ ] WIP: Rollback kernel state when undo using `criu`
+- [ ] TODO: Support for more data sources (e.g. SQL, S3, PySpark etc.)
+- [ ] TODO: Export a conversation as a notebook or html
 
 ## Things you can ask DataDM
 - [x] Load data from a URL
@@ -47,7 +52,9 @@ docker run --gpus all -p 7860:7860 -it ghcr.io/approximatelabs/datadm:0.1.0-cuda
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/approximatelabs/datadm/blob/main/datadm.ipynb)
 
 
-### 3. Install and Run
+### 3. Use as a python package
+
+> ⚠️ datadm used this way runs LLM generated code in your userspace
 
 For local-data, cloud-model mode (no GPU required) - requires an OpenAI API key
 ```bash
