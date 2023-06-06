@@ -63,8 +63,10 @@ css = """
 footer {display: none !important;}
 .gradio-container {min-height: 0px !important;}
 .disclaimer {font-variant-caps: all-small-caps;}
-.chatbox {flex-grow: 1;}
-.fullheight {height: 90vh;}
+#chatbox {flex-grow: 1; overflow-y: hidden !important;}
+#fullheight {height: 90vh; flex-wrap: nowrap;}
+#chatbox > .wrap { max-height: none !important; }
+#chatbox img { max-height: none !important; max-width: 100% !important; }
 """
 
 with gr.Blocks(
@@ -77,8 +79,8 @@ with gr.Blocks(
     files = []
     gr.Markdown("# Welcome to DataDM!")
     with gr.Row():
-        with gr.Column(scale=5, elem_classes="fullheight"):
-            chatbot = gr.Chatbot(elem_classes="chatbox", label="datadm")
+        with gr.Column(scale=5, elem_id="fullheight"):
+            chatbot = gr.Chatbot(elem_id="chatbox", show_label=False)
             with gr.Row():
                 with gr.Column():
                     msg = gr.Textbox(
@@ -99,7 +101,7 @@ with gr.Blocks(
                     label="agent",
                     multiselect=False,
                     show_label=True,
-                    interactive=True)
+                    interactive=True).style(container=False)
             with gr.Row():
                 model_selection = gr.Dropdown(
                     choices=list(llm_manager.llms.keys()),
@@ -107,8 +109,8 @@ with gr.Blocks(
                     label="model",
                     multiselect=False,
                     show_label=True,
-                    interactive=True)
-                model_state = gr.HighlightedText(label=False)
+                    interactive=True).style(container=False)
+                model_state = gr.HighlightedText(label=False).style(container=False)
             load_model = gr.Button("Load Model", visible=lambda: llm_manager.llms[llm_manager.selected]['state'] != 'loaded')
             files.append(gr.Text("No Data Files", label="Data Files"))
             for _ in range(10):

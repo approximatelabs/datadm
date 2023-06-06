@@ -170,16 +170,20 @@ import json
 output = []
 for name, x in list(globals().items()):
     if isinstance(x, pd.DataFrame) or isinstance(x, pd.Series):
-        x.to_csv(name + '.csv')
-        output.append({{
-            'name': name,
-            'columns': list(x.columns),
-            'rows': len(x),
-            'type': 'DataFrame' if isinstance(x, pd.DataFrame) else 'Series',
-            'csv': '{self.work_dir}' + '/' + name + '.csv',
-        }})
-print(json.dumps(output))
+        try:
+            x.to_csv(name + '.csv')
+            output.append({{
+                'name': name,
+                'columns': list(x.columns),
+                'rows': len(x),
+                'type': 'DataFrame' if isinstance(x, pd.DataFrame) else 'Series',
+                'csv': '{self.work_dir}' + '/' + name + '.csv',
+            }})
+        except Exception as e:
+            pass
+print("FROMHERE:"+json.dumps(output)+":TOHERE")
 """
         result = self.exec(code_to_extract)
-        frames = json.loads(result['stdout'])
+        jsonstring = result['stdout'].split('FROMHERE:')[1].split(':TOHERE')[0]
+        frames = json.loads(jsonstring)
         return frames
