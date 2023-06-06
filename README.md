@@ -9,24 +9,32 @@ DataDM is your private data assistant. A conversational interface for your data 
 
 ## Demo
 
+[ recorded demo video here ]
+
 ## Features
+- [x] Load multiple tables directly into the chat
+- [x] Persistent Juptyer kernel backend for data manipulation during conversation
+- [x] Natural language chat, visualizations/plots, and direct download of data assets
+- [x] Run entirely locally, keeping your data private
+- [x] Option to use OpenAI's GPT-3.5 or GPT-4 (requires API key)
+- [x] Easy to use docker-images for one-line deployment
+- [ ] GGML based mode (CPU only, no GPU required) [WIP]
 
-## TO Save:
+## Things you can ask DataDM
+- [x] load data from a URL
+- [x] clean data by removing duplicates, nulls, outliers, etc.
+- [x] join data from multiple tables into a single output table
+- [x] generate new fake data by asking for synthetic tables
+- [x] ask whatever you want to your very own private code-interpreter
+
+## Quickstart
 
 ```
-docker run --env-file ~/.env -p 7860:7860 -it datadm:latest
+docker run -e OPENAI_API_KEY={{YOUR_API_KEY_HERE}} -p 7860:7860 -it ghcr.io/approximatelabs/datadm:latest
 ```
 
+For local-mode using StarChat model (requiring a CUDA device with at least 24GB of RAM)
 ```
-docker run -e OPENAI_API_KEY=sk-Dasdfbadsdfasdf -p 7860:7860 -it datadm:latest
+docker run --gpus all -p 7860:7860 -it ghcr.io/approximatelabs/datadm:0.1.0-cuda
 ```
 
-## TODO:
-Fill this all out
-
-## Development
-
-```bash
-pip install -r dev-requirements.txt
-pip install -e .
-```

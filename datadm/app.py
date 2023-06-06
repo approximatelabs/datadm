@@ -4,7 +4,6 @@ import gradio as gr
 
 from datadm.repl import REPL
 from datadm.backend import llm_manager
-# from datadm.agents.local001 import Local001
 from datadm.agent import agent_manager
 from datadm.conversation import conversation_list_to_history
 
@@ -111,7 +110,7 @@ with gr.Blocks(
             load_model = gr.Button("Load Model", visible=lambda: llm_manager.llms[llm_manager.selected]['state'] != 'loaded')
             files.append(gr.Text("No Data Files", label="Data Files"))
             for _ in range(10):
-                f = gr.File("README.md", visible=False)
+                f = gr.File(__file__, visible=False)
                 files.append(f)
             upload = gr.UploadButton(label="Upload CSV")
 
@@ -151,8 +150,8 @@ with gr.Blocks(
 
 demo.queue(max_size=128, concurrency_count=1)
 
-def main():
-    demo.launch(share=False, server_name="0.0.0.0")
+def main(share=False):
+    demo.launch(share=share, server_name="0.0.0.0")
 
 if __name__ == "__main__":
     main()
