@@ -94,7 +94,7 @@ class REPL:
         else:
             raise RuntimeError('Kernel did not start')
         self.kc = kc
-        time.sleep(0.5)  # sleep to let things settle...
+        self.kc.wait_for_ready(timeout=5)
         return kc
 
     def exec(self, code, timeout=10):
@@ -162,3 +162,24 @@ class REPL:
             with open(os.path.join(self.work_dir, filename), 'wb') as f:
                 f.write(filebytes)
         return filename
+
+    def dataframes_as_csvs(self):
+        # find all dataframes or series
+        code_to_extract = f"""
+import json
+output = []
+for name, x in list(globals().items()):
+    if isinstance(x, pd.DataFrame) or isinstance(x, pd.Series):
+        x.to_csv(name + '.csv')
+        output.append({{
+            'name': name,
+            'columns': list(x.columns),
+            'rows': len(x),
+            'type': 'DataFrame' if isinstance(x, pd.DataFrame) else 'Series',
+            'csv': '{self.work_dir}' + '/' + name + '.csv',
+        }})
+print(json.dumps(output))
+"""
+        result = self.exec(code_to_extract)
+        frames = json.loads(result['stdout'])
+        return frames

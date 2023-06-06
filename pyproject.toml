@@ -13,7 +13,6 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "accelerate",
     "gradio",
     "guidance",
     "jupyter",
@@ -24,6 +23,11 @@ dependencies = [
 ]
 urls = {homepage = "https://github.com/approximatelabs/datadm"}
 dynamic = ["version"]
+
+
+[project.optional-dependencies]
+cuda = ["accelerate"]
+all = ["datadm[cuda]"]
 
 [project.scripts]
 datadm = "datadm.app:main"

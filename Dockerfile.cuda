@@ -1,4 +1,4 @@
-FROM python:3.10.11-bullseye
+FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
 
 RUN mkdir /datadm
 WORKDIR /datadm
@@ -7,6 +7,6 @@ COPY README.md /datadm
 COPY pyproject.toml /datadm
 COPY datadm/ /datadm/datadm
 
-RUN SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0 pip install -e .
+RUN SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0 pip install -e ".[cuda]"
 
 CMD ["datadm"]
