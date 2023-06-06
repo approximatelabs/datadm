@@ -5,8 +5,11 @@
 
 ![dataDM](datadm-header.png?raw=true)
 
-Chat with your data, personal data assistant, keep your data private with pure local mode, slide into your data's DMs
+DataDM is your private data assistant. A conversational interface for your data where you can load, clean, transform, and visualize without a single line of code. DataDM is open source and can be run entirely locally, keeping your juicy data secrets fully private. Slide into your data's DMs tonight.
 
+## Demo
+
+## Features
 
 ## TO Save:
 
