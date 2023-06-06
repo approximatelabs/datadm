@@ -1,11 +1,19 @@
-import torch
 import guidance
 import gradio as gr
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import os
 
+
+# TODO: fix this to check devices and packages to dynamically adjust available LLMs and models
+try:
+    import accelerate
+    local_available = True
+except ImportError:
+    local_available = False
+
 class StarcoderChat(guidance.llms.Transformers):
     def __init__(self, model_path="HuggingFaceH4/starchat-alpha", **kwargs):
+        import torch
         tokenizer = AutoTokenizer.from_pretrained(model_path, device_map='auto', revision='5058bd8557100137ade3c459bfc8100e90f71ec7')
         model = AutoModelForCausalLM.from_pretrained(model_path, device_map='auto', torch_dtype=torch.bfloat16, revision='5058bd8557100137ade3c459bfc8100e90f71ec7')
         model.eval()
@@ -23,12 +31,14 @@ class StarcoderChat(guidance.llms.Transformers):
 class BackendLLMManager():
     def __init__(self):
         self.llms = {
-            'starcoderchat-cuda': {'state': 'unloaded', 'llm': None},
             # 'starcoderchat-cpu': {'state': 'unloaded', 'llm': None},
-            'openai-gpt-3.5': {'state': 'unloaded', 'llm': None},
-            'openai-gpt-4': {'state': 'unloaded', 'llm': None},
+            'openai-gpt-3.5': {'state': 'unloaded', 'llm': None, 'mode': 'api'},
+            'openai-gpt-4': {'state': 'unloaded', 'llm': None, 'mode': 'api'},
         }
-    
+
+        if local_available:
+            self.llms['starcoderchat-cuda'] = {'state': 'unloaded', 'llm': None, 'mode': 'cuda'}
+
     def load(self, llm_name):
         if self.llms[llm_name]['state'] == 'unloaded':
             if llm_name == 'starcoderchat-cuda':

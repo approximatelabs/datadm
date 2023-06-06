@@ -1,11 +1,13 @@
 import re
 import os
 
-from datadm.backend import llm_manager
+from datadm.backend import llm_manager, local_available
 from datadm.conversation import conversation_list_to_history
 
 
 class Agent:
+    is_local = False
+
     def __init__(self):
         pass
 
@@ -36,15 +38,11 @@ class Agent:
         conversation.append({'role': 'assistant', 'content': f"Loading the data...\n```python\n{code_to_execute}\n```"})
         conversation.append({'role': 'assistant', 'content': result})
         return conversation_list_to_history(conversation), conversation
-    
-    @property
-    def is_local(self):
-        return False
 
     @property
     def valid_models(self):
         if self.is_local:
-            return set(['starcoderchat-cuda'])
+            return set([k for k, v in llm_manager.llms.items() if v['mode'] != 'api'])
         else:
             return set(llm_manager.llms.keys())
 
@@ -58,6 +56,8 @@ class AgentManager:
                     module = __import__(f"datadm.agents.{module_name}", fromlist=[module_name])
                     for name, obj in module.__dict__.items():
                         if isinstance(obj, type) and issubclass(obj, Agent) and obj != Agent:
+                            if obj.is_local and not local_available:
+                                continue
                             self.agents[name] = obj()
                 except Exception as e:
                     print(f"Error importing agent {module_name}: {e}")

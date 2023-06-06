@@ -43,9 +43,7 @@ Looking at the executed results above, we can see {{gen "summary" temperature=0.
 '''
 
 class CoTMultiStep(Agent):
-    @property
-    def is_local(self):
-        return True
+    is_local = True
 
     def _bot(self, repl, conversation, llm):
         starting_convo = conversation

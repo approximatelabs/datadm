@@ -102,7 +102,7 @@ with gr.Blocks(
             with gr.Row():
                 model_selection = gr.Dropdown(
                     choices=list(llm_manager.llms.keys()),
-                    value="starcoderchat-cuda",
+                    value="starcoderchat-cuda" if "starcoderchat-cuda" in llm_manager.llms else list(llm_manager.llms.keys())[0],
                     label="model",
                     multiselect=False,
                     show_label=True,
@@ -152,7 +152,7 @@ with gr.Blocks(
 demo.queue(max_size=128, concurrency_count=1)
 
 def main():
-    demo.launch(share=False)
+    demo.launch(share=False, server_name="0.0.0.0")
 
 if __name__ == "__main__":
     main()
