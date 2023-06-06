@@ -71,3 +71,9 @@ $ datadm
 ## Contributions
 
 Contributions are welcome! Feel free to submit a PR or open an issue.
+
+## Community
+
+Join the [Discord](https://discord.gg/kW9nBQErGe) to chat with the team
+
+Check out our other projects: [sketch](https://github.com/approximatelabs/sketch) and [approximatelabs](https://approximatelabs.com)

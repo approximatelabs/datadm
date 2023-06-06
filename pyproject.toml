@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "datadm"
-description = "Chat with your data, personal data assistant, keep your data private with pure local mode, slide into your data's DMs"
+description = "DataDM is your private data assistant. Slide into your data's DMs"
 readme = "README.md"
 requires-python = ">=3.8"
 keywords = ["nlp", "ai", "data", "chatbot", "database", "csv", "analytics", "datachat", "datadm"]
