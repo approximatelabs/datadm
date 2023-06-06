@@ -3,9 +3,20 @@ import tempfile
 import base64
 import hashlib
 import os
+import re
 
 temp_image_dir = tempfile.TemporaryDirectory()
 atexit.register(temp_image_dir.cleanup)
+
+
+# TODO: Replace the entire concept of conversation with the actual REPL kernel object
+#   the conversation can be stored as messages to the kernel (eg. markdown messages)
+#   this will allow exporting the full jupyter kernel history as a notebook / html page
+#   which would represent the entire conversation and code.
+
+def strip_ansi(text):
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
 
 
 def conversation_list_to_history(convo_list):
@@ -37,7 +48,7 @@ def conversation_list_to_history(convo_list):
                 if val['stdout']:
                     new_text += val['stdout']
                 if val['tracebacks']:
-                    new_text += "\n".join(val['tracebacks'])[:400]
+                    new_text += strip_ansi(val['tracebacks'])
                 if val['data']:
                     for dataentry in val['data']:
                         for k, v in dataentry.items():
@@ -54,7 +65,7 @@ def conversation_list_to_history(convo_list):
                                     f.write(base64.b64decode(v))
                                 images_to_append += [file_path]
                 if new_text:
-                    new_text = f'```\n{new_text}\n```'
+                    new_text = f'```bash\n{new_text}\n```'
                 new_text += new_html_text
             if new_text:
                 new_row.append(new_text)
@@ -79,7 +90,7 @@ def clean_conversation_list(convo_list):
         if convo['content']['stdout']:
             new_text += convo['content']['stdout']
         if convo['content']['tracebacks']:
-            new_text += "\n".join(convo['content']['tracebacks'][:400])  # limit to prevent overflow
+            new_text += convo['content']['tracebacks'][:400]
         if convo['content']['data']:
             new_text += "\n".join([v for dataentry in convo['content']['data'] for k, v in dataentry.items() if 'text' in k and 'html' not in k])
             new_html_text += "\n".join([v for dataentry in convo['content']['data'] for k, v in dataentry.items() if 'html' in k])
