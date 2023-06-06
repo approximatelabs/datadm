@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/datadm)](https://pypi.org/project/datadm/)
 [![tests](https://github.com/approximatelabs/datadm/actions/workflows/test-build-publish.yml/badge.svg)](https://github.com/approximatelabs/datadm/actions/workflows/test-build-publish.yml)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/approximatelabs/datadm/blob/main/notebooks/datadm.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/approximatelabs/datadm/blob/main/datadm.ipynb)
 [![](https://dcbadge.vercel.app/api/server/kW9nBQErGe?compact=true&style=flat)](https://discord.gg/kW9nBQErGe)
 
 ![dataDM](datadm-header.png?raw=true)
@@ -44,7 +44,7 @@ docker run --gpus all -p 7860:7860 -it ghcr.io/approximatelabs/datadm:0.1.0-cuda
 ```
 
 ### 2. Colab to run in the cloud
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/approximatelabs/datadm/blob/main/notebooks/datadm.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/approximatelabs/datadm/blob/main/datadm.ipynb)
 
 
 ### 3. Install and Run
