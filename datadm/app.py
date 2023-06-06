@@ -57,6 +57,8 @@ def setup_repl():
     repl.exec('import pandas as pd')
     repl.exec('import numpy as np')
     repl.exec('import matplotlib.pyplot as plt')
+    repl.exec("pd.set_option('display.max_columns', 500)")
+    repl.exec("pd.set_option('display.width', 1000)")
     return repl
 
 css = """
