@@ -29,6 +29,10 @@ DataDM is your private data assistant. A conversational interface for your data 
 
 ## Quickstart
 
+### Colab to run in the cloud
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/approximatelabs/datadm/blob/main/notebooks/datadm.ipynb)
+
+### Docker to run locally
 ```
 docker run -e OPENAI_API_KEY={{YOUR_API_KEY_HERE}} -p 7860:7860 -it ghcr.io/approximatelabs/datadm:latest
 ```
