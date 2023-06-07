@@ -11,7 +11,7 @@ DataDM is your private data assistant. A conversational interface for your data 
 
 ## Demo
 
-[ recorded demo video here ]
+https://github.com/approximatelabs/datadm/assets/916073/411cdcac-9ed3-4fa3-b794-990a43c3673f
 
 Note: Demo above is `GPT-4`, which sends the conversation to OpenAI's API. To use in full local mode, be sure to select `starcoderchat-cuda` as the model. This will use the StarChat model, which is a bit less capable but runs entirely locally.
 
