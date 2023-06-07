@@ -89,10 +89,12 @@ with gr.Blocks(
                         label="Chat Message Box",
                         placeholder="Chat Message Box",
                         show_label=False,
+                        elem_id="chat_message_box"
                     ).style(container=False)
                 with gr.Column():
                     with gr.Row():
-                        submit = gr.Button("Submit")
+                        submit = gr.Button("Submit", elem_id="submit_button")
+                        cancel = gr.Button("Cancel", visible=False)
                         undo = gr.Button("Undo")
                         retry = gr.Button("Retry")
         with gr.Column(scale=1):
@@ -111,21 +113,25 @@ with gr.Blocks(
                     label="model",
                     multiselect=False,
                     show_label=True,
-                    interactive=True).style(container=False)
+                    interactive=True,
+                    elem_id='model_selection_dropdown').style(container=False)
                 model_state = gr.HighlightedText(label=False).style(container=False)
-            load_model = gr.Button("Load Model", visible=lambda: llm_manager.llms[llm_manager.selected]['state'] != 'loaded')
+            load_model = gr.Button("Load Model", visible=False, elem_id="load_model_button")
             files.append(gr.Text("No Data Files", label="Data Files"))
             for _ in range(10):
                 f = gr.File(__file__, visible=False)
                 files.append(f)
-            upload = gr.UploadButton(label="Upload CSV")
+            upload = gr.UploadButton(label="Upload CSV", elem_id="upload_button")
 
     # Setup Blocks
-    demo.load(llm_manager.model_status, model_selection, [model_state, load_model])
+    demo.load(lambda: gr.Button.update(visible=False), None, load_model
+        ).then(llm_manager.model_status, model_selection, model_state
+        ).then(lambda llm_name: gr.Button.update(visible=(llm_manager.llms[llm_name]['state'] != 'ready')), model_selection, load_model)
     demo.load(setup_repl, None, repl)
 
     # Configuration Blocks
-    model_selection.change(lambda x: (x, *llm_manager.model_status(x)), model_selection, [model_selection, model_state, load_model],)
+    model_selection.change(lambda x: (x, llm_manager.model_status(x)), model_selection, [model_selection, model_state]
+        ).then(lambda llm_name: gr.Button.update(visible=(llm_manager.llms[llm_name]['state'] != 'ready')), model_selection, load_model)
     agent_selection.change(
         lambda x: gr.Dropdown.update(
             choices=agent_manager.get(x).valid_models & set(llm_manager.llms.keys()),
@@ -133,23 +139,35 @@ with gr.Blocks(
         ), 
         agent_selection,
         [model_selection]
-    )
-    load_model.click(llm_manager.load, model_selection, [model_state, load_model])
+    ).then(lambda llm_name: gr.Button.update(visible=(llm_manager.llms[llm_name]['state'] != 'ready')), model_selection, load_model)
+
+    load_model.click(llm_manager.load, model_selection, model_state
+        ).then(lambda llm_name: gr.Button.update(visible=(llm_manager.llms[llm_name]['state'] != 'ready')), model_selection, load_model)
 
     # Agent Blocks
     upload_event = upload.upload(add_data, [agent_selection, upload, repl, conversation],[chatbot, conversation]
         ).then(get_downloads, repl, files)
 
-    submit_event = msg.submit(user, [agent_selection, msg, chatbot, conversation], [msg, chatbot, conversation], queue=False
-        ).then(bot, [agent_selection, repl, conversation, model_selection], [chatbot, conversation], queue=True
-        ).then(get_downloads, repl, files)
+    buttonset = [submit, cancel, undo, retry]
+    running_buttons = [gr.Button.update(**k) for k in [{'visible': False}, {'visible': True}, {'interactive': False}, {'interactive': False}]]
+    idle_buttons = [gr.Button.update(**k) for k in [{'visible': True}, {'visible': False}, {'interactive': True}, {'interactive': True}]]
+
+    msg_enter_event = msg.submit(user, [agent_selection, msg, chatbot, conversation], [msg, chatbot, conversation], queue=False
+        ).then(lambda: running_buttons, None, buttonset, queue=False
+        ).then(bot, [agent_selection, repl, conversation, model_selection], [chatbot, conversation], queue=True)
+    msg_enter_finalize = msg_enter_event.then(get_downloads, repl, files
+        ).then(lambda: idle_buttons, None, buttonset, queue=False)
 
     submit_click_event = submit.click(user, [agent_selection, msg, chatbot, conversation], [msg, chatbot, conversation], queue=False
-        ).then(bot, [agent_selection, repl, conversation, model_selection], [chatbot, conversation], queue=True
-        ).then(get_downloads, repl, files)
+        ).then(lambda: running_buttons, None, buttonset, queue=False
+        ).then(bot, [agent_selection, repl, conversation, model_selection], [chatbot, conversation], queue=True)
+    submit_click_finalize = submit_click_event.then(get_downloads, repl, files
+        ).then(lambda: idle_buttons, None, buttonset, queue=False)
 
     # Control Blocks
     undo.click(remove_to_last_talker, [conversation, model_selection], outputs=[chatbot, conversation], queue=False)
+    cancel.click(None, cancels=[msg_enter_event, submit_click_event], queue=False
+        ).then(lambda: idle_buttons, None, buttonset, queue=False)
     retry.click(remove_to_last_talker, [conversation, model_selection], outputs=[chatbot, conversation], queue=False
         ).then(bot, [agent_selection, repl, conversation, model_selection], [chatbot, conversation], queue=True
         ).then(get_downloads, repl, files)

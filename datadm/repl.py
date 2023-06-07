@@ -184,6 +184,11 @@ for name, x in list(globals().items()):
 print("FROMHERE:"+json.dumps(output)+":TOHERE")
 """
         result = self.exec(code_to_extract)
-        jsonstring = result['stdout'].split('FROMHERE:')[1].split(':TOHERE')[0]
-        frames = json.loads(jsonstring)
+        frames = []
+        if result['stdout']:
+            try:
+                jsonstring = result['stdout'].split('FROMHERE:')[1].split(':TOHERE')[0]
+                frames = json.loads(jsonstring)
+            except Exception as e:
+                print(e, result['stdout'])
         return frames

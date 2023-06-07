@@ -1,5 +1,4 @@
 import guidance
-import gradio as gr
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import os
 
@@ -68,8 +67,7 @@ class BackendLLMManager():
 
     def model_status(self, llm_name):
         state = self.llms[llm_name]['state']
-        update = gr.Button.update(visible = state != 'ready')
-        return [(llm_name, state)], update
+        return [(llm_name, state)]
 
 
 llm_manager = BackendLLMManager()

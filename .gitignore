@@ -162,3 +162,5 @@ cython_debug/
 .python-version
 
 datadm/_version.py
+
+.DS_Store

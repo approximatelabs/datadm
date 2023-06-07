@@ -1,5 +1,6 @@
 import re
 import os
+import tenacity
 
 from datadm.backend import llm_manager, local_available
 from datadm.conversation import conversation_list_to_history
@@ -11,6 +12,7 @@ class Agent:
     def __init__(self):
         pass
 
+    @tenacity.retry(wait=tenacity.wait_fixed(1), stop=tenacity.stop_after_attempt(3))
     def bot(self, repl, conversation, model_selection):
         llm = llm_manager.llms.get(model_selection, {}).get('llm')
         if llm is None:
