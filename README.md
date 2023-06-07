@@ -15,6 +15,8 @@ https://github.com/approximatelabs/datadm/assets/916073/f15e6ab5-8108-40ea-a6de-
 
 Note: Demo above is `GPT-4`, which sends the conversation to OpenAI's API. To use in full local mode, be sure to select `starcoderchat-cuda` as the model. This will use the StarChat model, which is a bit less capable but runs entirely locally.
 
+⚠️ LLMs are known to hallucinate and generate fake results. So, double-check before trusting their results blindly!
+
 ## Features
 - [x] Persistent Juptyer kernel backend for data manipulation during conversation
 - [x] Run entirely locally, keeping your data private
