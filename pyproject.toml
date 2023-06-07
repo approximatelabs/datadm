@@ -32,6 +32,9 @@ all = ["datadm[cuda]"]
 [project.scripts]
 datadm = "datadm.app:main"
 
+[tool.setuptools]
+packages = ["datadm"]
+
 [tool.setuptools_scm]
 
 [tool.tox]
