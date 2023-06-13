@@ -72,7 +72,7 @@ $ datadm
 
 ## Special Thanks
 
-* [starchat-alpha](https://huggingface.co/HuggingFaceH4/starchat-alpha) ([starcoder](https://github.com/bigcode-project/starcoder) with [databricks-dolly](https://huggingface.co/datasets/databricks/databricks-dolly-15k) and [OpenAssistant/oasst1](https://huggingface.co/datasets/OpenAssistant/oasst1))
+* [starchat-alpha](https://huggingface.co/HuggingFaceH4/starchat-beta) ([starcoder](https://github.com/bigcode-project/starcoder) with [databricks-dolly](https://huggingface.co/datasets/databricks/databricks-dolly-15k) and [OpenAssistant/oasst1](https://huggingface.co/datasets/OpenAssistant/oasst1))
 * [Guidance](https://github.com/microsoft/guidance)
 * [HuggingFace](https://huggingface.co/)
 * [OpenAI](https://openai.com/)
