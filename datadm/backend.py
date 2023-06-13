@@ -11,7 +11,7 @@ except ImportError:
     local_available = False
 
 class StarcoderChat(guidance.llms.Transformers):
-    def __init__(self, model_path="HuggingFaceH4/starchat-alpha", **kwargs):
+    def __init__(self, model_path="HuggingFaceH4/starchat-beta", **kwargs):
         import torch
         tokenizer = AutoTokenizer.from_pretrained(model_path, device_map='auto', revision='5058bd8557100137ade3c459bfc8100e90f71ec7')
         model = AutoModelForCausalLM.from_pretrained(model_path, device_map='auto', torch_dtype=torch.bfloat16, revision='5058bd8557100137ade3c459bfc8100e90f71ec7')
