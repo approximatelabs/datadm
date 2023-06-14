@@ -29,14 +29,12 @@ class StarChat(guidance.llms.Transformers):
 
 class BackendLLMManager():
     def __init__(self):
+        self.llms = {}
         if local_available:
             self.llms['starchat-alpha-cuda'] = {'state': 'unloaded', 'llm': None, 'mode': 'cuda', 'model_path': 'HuggingFaceH4/starchat-alpha', 'revision': '5058bd8557100137ade3c459bfc8100e90f71ec7'}
             self.llms['starchat-beta-cuda'] = {'state': 'unloaded', 'llm': None, 'mode': 'cuda', 'model_path': 'HuggingFaceH4/starchat-beta', 'revision': 'b1bcda690655777373f57ea6614eb095ec2c886f'}
-        self.llms = {
-            # 'starcoderchat-cpu': {'state': 'unloaded', 'llm': None},
-            'openai-gpt-3.5': {'state': 'unloaded', 'llm': None, 'mode': 'api'},
-            'openai-gpt-4': {'state': 'unloaded', 'llm': None, 'mode': 'api'},
-        }
+        self.llms['openai-gpt-3.5'] = {'state': 'unloaded', 'llm': None, 'mode': 'api'}
+        self.llms['openai-gpt-4'] = {'state': 'unloaded', 'llm': None, 'mode': 'api'}
 
     def load(self, llm_name):
         if self.llms[llm_name]['state'] == 'unloaded':
