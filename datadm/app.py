@@ -109,8 +109,7 @@ with gr.Blocks(
             with gr.Row():
                 model_selection = gr.Dropdown(
                     choices=list(llm_manager.llms.keys()),
-                    #TODO: Check if this check for model name is still needed.
-                    value="starcoderchat-cuda-alpha" if "starcoderchat-cuda-alpha" in llm_manager.llms else list(llm_manager.llms.keys())[0],
+                    value=list(llm_manager.llms.keys())[0],
                     label="model",
                     multiselect=False,
                     show_label=True,
