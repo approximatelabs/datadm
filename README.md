@@ -13,7 +13,7 @@ DataDM is your private data assistant. A conversational interface for your data 
 
 https://github.com/approximatelabs/datadm/assets/916073/f15e6ab5-8108-40ea-a6de-c69a1389af84
 
-Note: Demo above is `GPT-4`, which sends the conversation to OpenAI's API. To use in full local mode, be sure to select `starcoderchat-cuda` as the model. This will use the StarChat model, which is a bit less capable but runs entirely locally.
+Note: Demo above is `GPT-4`, which sends the conversation to OpenAI's API. To use in full local mode, be sure to select `starchat-alpha-cuda` or `starchat-beta-cuda` as the model. This will use the StarChat model, which is a bit less capable but runs entirely locally.
 
 ⚠️ LLMs are known to hallucinate and generate fake results. So, double-check before trusting their results blindly!
 
@@ -72,7 +72,7 @@ $ datadm
 
 ## Special Thanks
 
-* [starchat-alpha](https://huggingface.co/HuggingFaceH4/starchat-alpha) ([starcoder](https://github.com/bigcode-project/starcoder) with [databricks-dolly](https://huggingface.co/datasets/databricks/databricks-dolly-15k) and [OpenAssistant/oasst1](https://huggingface.co/datasets/OpenAssistant/oasst1))
+* [starchat-beta](https://huggingface.co/HuggingFaceH4/starchat-beta) ([starcoder](https://github.com/bigcode-project/starcoder) with [databricks-dolly](https://huggingface.co/datasets/databricks/databricks-dolly-15k) and [OpenAssistant/oasst1](https://huggingface.co/datasets/OpenAssistant/oasst1))
 * [Guidance](https://github.com/microsoft/guidance)
 * [HuggingFace](https://huggingface.co/)
 * [OpenAI](https://openai.com/)

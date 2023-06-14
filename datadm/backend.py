@@ -10,11 +10,11 @@ try:
 except ImportError:
     local_available = False
 
-class StarcoderChat(guidance.llms.Transformers):
-    def __init__(self, model_path="HuggingFaceH4/starchat-alpha", **kwargs):
+class StarChat(guidance.llms.Transformers):
+    def __init__(self, model_path=None, revision=None, **kwargs):
         import torch
-        tokenizer = AutoTokenizer.from_pretrained(model_path, device_map='auto', revision='5058bd8557100137ade3c459bfc8100e90f71ec7')
-        model = AutoModelForCausalLM.from_pretrained(model_path, device_map='auto', torch_dtype=torch.bfloat16, revision='5058bd8557100137ade3c459bfc8100e90f71ec7')
+        tokenizer = AutoTokenizer.from_pretrained(model_path, device_map='auto', revision=revision)
+        model = AutoModelForCausalLM.from_pretrained(model_path, device_map='auto', torch_dtype=torch.bfloat16, revision=revision)
         model.eval()
         super().__init__(model, tokenizer=tokenizer, device_map='auto', **kwargs)
     
@@ -29,35 +29,32 @@ class StarcoderChat(guidance.llms.Transformers):
 
 class BackendLLMManager():
     def __init__(self):
-        self.llms = {
-            # 'starcoderchat-cpu': {'state': 'unloaded', 'llm': None},
-            'openai-gpt-3.5': {'state': 'unloaded', 'llm': None, 'mode': 'api'},
-            'openai-gpt-4': {'state': 'unloaded', 'llm': None, 'mode': 'api'},
-        }
-
+        self.llms = {}
         if local_available:
-            self.llms['starcoderchat-cuda'] = {'state': 'unloaded', 'llm': None, 'mode': 'cuda'}
+            self.llms['starchat-alpha-cuda'] = {'state': 'unloaded', 'llm': None, 'mode': 'cuda', 'model_path': 'HuggingFaceH4/starchat-alpha', 'revision': '5058bd8557100137ade3c459bfc8100e90f71ec7'}
+            self.llms['starchat-beta-cuda'] = {'state': 'unloaded', 'llm': None, 'mode': 'cuda', 'model_path': 'HuggingFaceH4/starchat-beta', 'revision': 'b1bcda690655777373f57ea6614eb095ec2c886f'}
+        self.llms['openai-gpt-3.5'] = {'state': 'unloaded', 'llm': None, 'mode': 'api'}
+        self.llms['openai-gpt-4'] = {'state': 'unloaded', 'llm': None, 'mode': 'api'}
 
     def load(self, llm_name):
         if self.llms[llm_name]['state'] == 'unloaded':
-            if llm_name == 'starcoderchat-cuda':
-                self.llms[llm_name]['state'] = 'loading'
-                self.llms[llm_name]['llm'] = StarcoderChat()
-                self.llms[llm_name]['state'] = 'ready'
+            self.llms[llm_name]['state'] = 'loading'
+            if llm_name in ['starchat-alpha-cuda', 'starchat-beta-cuda']:
+                self.llms[llm_name]['llm'] = StarChat(**self.llms[llm_name])
             elif llm_name == 'openai-gpt-4':
-                self.llms[llm_name]['state'] = 'loading'
                 if 'OPENAI_API_KEY' not in os.environ:
+                    self.llms[llm_name]['state'] = 'error'
                     raise RuntimeError("OPENAI_API_KEY not found in environment")
                 self.llms[llm_name]['llm'] = guidance.llms.OpenAI("gpt-4")
-                self.llms[llm_name]['state'] = 'ready'
             elif llm_name == 'openai-gpt-3.5':
-                self.llms[llm_name]['state'] = 'loading'
                 if 'OPENAI_API_KEY' not in os.environ:
+                    self.llms[llm_name]['state'] = 'error'
                     raise RuntimeError("OPENAI_API_KEY not found in environment")
                 self.llms[llm_name]['llm'] = guidance.llms.OpenAI("gpt-3.5-turbo")
-                self.llms[llm_name]['state'] = 'ready'
             else:
+                self.llms[llm_name]['state'] = 'error'
                 raise RuntimeError(f"LLM {llm_name} not supported")
+            self.llms[llm_name]['state'] = 'ready'
         return self.model_status(llm_name)
     
     def unload(self, llm_name):
