@@ -175,7 +175,7 @@ def search_code(query):
     base_url = "https://api.github.com"
     endpoint = "/search/code"
     params = {
-        "q": f"{query} language:csv size:>200",
+        "q": f"{query} .csv in:path",
         "per_page": 5,
     }
     headers = {
@@ -195,11 +195,15 @@ def format_items(items):
         subpath = item["path"]
         fullurl = item["html_url"].replace("/blob/", "/raw/")
         
-        response = requests.get(fullurl)
+        response = requests.get(fullurl, stream=True)
         if response.status_code == 200:
-            content = response.text
-            rows = content.strip().split("\n")[:3]
-            content = "\n".join(rows)
+            lines_count = 0
+            content = ''
+            for line in response.iter_lines():
+                if lines_count >= 3:
+                    break
+                content += line.decode('utf-8') + "\n"
+                lines_count += 1
         else:
             content = ""
         
