@@ -30,7 +30,13 @@ class REPL:
             stdout=subprocess.DEVNULL,
             stderr=subprocess.STDOUT,
             cwd=self.work_dir,
-            start_new_session=True
+            start_new_session=True,
+            env={
+                'HOME': self.work_dir,
+                'SHELL': '/bin/bash',
+                'PWD': self.work_dir,
+                'PATH': os.environ.get('PATH', ''),
+            }
         )
         self.kernel_pid = kernel_process.pid
         atexit.register(lambda: os.kill(self.kernel_pid, signal.SIGKILL))
