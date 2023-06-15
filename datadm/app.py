@@ -1,6 +1,9 @@
 import dotenv
-
+import random 
+import json
 import gradio as gr
+import csv
+import requests
 
 from datadm.repl import REPL
 from datadm.backend import llm_manager
@@ -61,6 +64,42 @@ def setup_repl():
     repl.exec("pd.set_option('display.width', 1000)")
     return repl
 
+
+def tab_results(query, ntab):
+    url = "https://gist.githubusercontent.com/rnirmal/e01acfdaf54a6f9b24e91ba4cae63518/raw/6b589a5c5a851711e20c5eb28f9d54742d1fe2dc/datasets.csv"
+    response = requests.get(url)
+    if response.status_code == 200:
+        content = response.text
+        content = content.splitlines()
+        nrows = len(content)
+        rows = csv.reader(content)
+        header = next(rows)
+        tables = []
+        
+        for _ in range(nrows):
+            row = next(rows, None)
+            if row is None:
+                break
+            table = {
+                "description": row[1],
+                "table": row[0],
+                "url": row[2]
+            }
+            tables.append(table)
+        
+        if query is not None:
+            tables = [table for table in tables if query.lower() in table['description'].lower() or query.lower() in table['table'].lower()]
+
+        response = {
+            "tables": tables
+        }
+    else:
+        response = {
+            "tables": []
+        }
+
+    return json.dumps(response)
+
 css = """
 footer {display: none !important;}
 .gradio-container {min-height: 0px !important;}
@@ -71,12 +110,104 @@ footer {display: none !important;}
 #chatbox img { max-height: none !important; max-width: 100% !important; }
 """
 
+class DataSearchResultRowComponent:
+    def __init__(self):
+        self.data = {
+            'title': {'class': gr.Text, 'kwargs': {'value': 'hello', 'show_label': False}},
+            'description': {'class': gr.Markdown, 'kwargs': {'value': 'description'}},
+            'download': {'class': gr.Button, 'kwargs': {'value': '📁'}},
+        }
+        self.ref_order = []
+
+    def component(self, name):
+        self.ref_order.append(name)
+        kwargs = self.data.get(name, {}).get('kwargs', {})
+        return self.data.get(name, {}).get('class', gr.Text)(**kwargs)
+
+    def gradio_gen(self):
+        objs = []
+        with gr.Column():
+            objs.append(self.component('title').style(container=False))
+            objs.append(self.component('description'))
+        with gr.Column():
+            objs.append(self.component('download').style(container=False))
+
+        return objs
+    
+    def gradio_update(self):
+        res = []
+        for k in self.ref_order:
+            res.append(self.data[k]['class'].update(**self.data[k]['kwargs']))
+        return res
+
+class Container:
+    def __init__(self, n):
+        self.n = n
+        self.data = []
+        self.objs = []
+        for _ in range(n):
+            self.objs.append(DataSearchResultRowComponent())
+
+    def gradio_gen(self):
+        ret = []
+        for obj in self.objs:
+            with gr.Row():
+                for obj in obj.gradio_gen():
+                    ret.append(obj)
+        return ret
+
+    def update_values(self, tables):
+        self.data = tables
+
+    def set_offset(self, offset):
+        to_be_rendered = self.data[offset:offset+self.n]
+        for i, obj in enumerate(self.objs):
+            if i < len(to_be_rendered):
+                obj.data['title']['kwargs']['value'] = to_be_rendered[i]['table']
+                obj.data['description']['kwargs']['value'] = to_be_rendered[i]['description']
+                obj.data['download']['kwargs']['value'] = f'📁 {to_be_rendered[i]["url"]}'
+            else:
+                obj.data['title']['kwargs']['value'] = ''
+                obj.data['description']['kwargs']['value'] = ''
+                obj.data['download']['kwargs']['value'] = ''
+
+    def updater(self, offset):
+        self.set_offset(offset)
+        updates = []
+        for obj in self.objs:
+            updates.extend(obj.gradio_update())
+        return updates
+
+
+def randomupdate(query, container):
+    tables = tab_results(query=query, ntab=5)
+    tables = json.loads(tables)
+    if isinstance(tables, dict):
+        tables = tables['tables']
+    container.update_values(tables)
+    return container.updater(0)
+
 with gr.Blocks(
     theme=gr.themes.Soft(),
     css=css,
     analytics_enabled=False,
 ) as demo:
+    container = gr.State(Container(1))
+    results = []
     conversation = gr.State([])
+    with gr.Row():
+        query = gr.Textbox(
+            label="Search",
+            placeholder="What data are you looking for?",
+            show_label=False,
+            elem_id="search_textbox"
+        ).style(container=False)
+        search = gr.Button("Search")
+    with gr.Column():
+        results.extend(container.value.gradio_gen())
+        index_offset = gr.Number(0, interactive=True)
+    search.click(randomupdate, [query, container], results).then(lambda: 0, None, index_offset)
+    index_offset.change(lambda container, ioff: container.updater(int(ioff)), [container, index_offset], results)
     repl = gr.State(None)
     files = []
     gr.Markdown("# Welcome to DataDM!")
