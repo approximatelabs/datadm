@@ -32,11 +32,10 @@ class REPL:
             cwd=self.work_dir,
             start_new_session=True,
             env={
-                'USER': os.environ['USER'],
                 'HOME': self.work_dir,
                 'SHELL': '/bin/bash',
                 'PWD': self.work_dir,
-                'PATH': os.environ['PATH'],
+                'PATH': os.environ.get('PATH', ''),
             }
         )
         self.kernel_pid = kernel_process.pid
