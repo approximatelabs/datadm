@@ -30,10 +30,14 @@ class Agent:
         return "", history + [[message, None]], conversation + [{'role': 'user', 'content': message}]
 
     def add_data(self, file, repl, conversation):
-        repl.upload_file(file.name)
-        basename = file.name.split('/')[-1]
         def clean(varStr): return re.sub('\W|^(?=\d)','_', varStr)
-        varname = clean(basename.split('.')[0])
+        if isinstance(file, str):
+            basename = file
+            varname = clean(basename.split('/')[-1].split('.')[0])
+        else:
+            repl.upload_file(file.name)
+            basename = file.name.split('/')[-1]
+            varname = clean(basename.split('.')[0])
         code_to_execute = f"{varname} = pd.read_csv('{basename}')\nprint({varname}.head())"
         result = repl.exec(code_to_execute)
         conversation.append({'role': 'user', 'content': f"Added {basename}"})
