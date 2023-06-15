@@ -171,12 +171,11 @@ class Container:
         return updates
 
 
-
 def search_code(query):
     base_url = "https://api.github.com"
     endpoint = "/search/code"
     params = {
-        "q": f"{query} extension:csv",
+        "q": f"{query} language:csv size:>200",
         "per_page": 5,
     }
     headers = {
@@ -220,6 +219,7 @@ def randomupdate(query, container):
     formatted_results = format_items(results)
     container.update_values(formatted_results)
     return container.updater(0)
+
 
 with gr.Blocks(
     theme=gr.themes.Soft(),
