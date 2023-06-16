@@ -93,14 +93,14 @@ class DataSearchResultRowComponent:
         self.gradios = {
             'html': {'class': gr.HTML, 'kwargs': {'value': '<div></div>'}},
             'url': {'class': gr.Text, 'kwargs': {'value': 'unknown', "visible": False}},
-            'download': {'class': gr.Button, 'kwargs': {'value': 'Add To Chat', "container": False}},
+            'download': {'class': gr.Button, 'kwargs': {'value': 'Add To Chat'}},
         }
         self.ref_order = []
 
-    def component(self, name):
+    def component(self, name, **extra_kwargs):
         self.ref_order.append(name)
         kwargs = self.gradios.get(name, {}).get('kwargs', {})
-        return self.gradios.get(name, {}).get('class', gr.Text)(**kwargs)
+        return self.gradios.get(name, {}).get('class', gr.Text)(**kwargs, **extra_kwargs)
 
     def gradio_gen(self, upload_magic_thens):
         objs = []
@@ -108,7 +108,7 @@ class DataSearchResultRowComponent:
             objs.append(self.component('html'))
             objs.append(self.component('url'))
         with gr.Column(scale=1, elem_id="justify_center", min_width=180):
-            objs.append(self.component('download'))
+            objs.append(self.component('download', container=False))
         events = objs[-1].click(lambda url: print(f"Downloading CSV: {url}"), objs[-2], None)
         for then_args in upload_magic_thens(objs[-2]):
             events.then(*then_args)
