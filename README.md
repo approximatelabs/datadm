@@ -1,4 +1,4 @@
-# [dataDM](https://github.com/approximatelabs/datadm) 😏💬📊
+# [dataDM](https://github.com/approximatelabs/datadm) 💬📊
 
 [![PyPI](https://img.shields.io/pypi/v/datadm)](https://pypi.org/project/datadm/)
 [![tests](https://github.com/approximatelabs/datadm/actions/workflows/test-build-publish.yml/badge.svg)](https://github.com/approximatelabs/datadm/actions/workflows/test-build-publish.yml)
