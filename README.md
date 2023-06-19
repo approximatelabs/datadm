@@ -17,7 +17,7 @@ Note: Demo above is `GPT-4`, which sends the conversation to OpenAI's API. To us
 
 ⚠️ LLMs are known to hallucinate and generate fake results. So, double-check before trusting their results blindly!
 
-### ⇒ *[Hosted public environment is live! Try it out now (Click Here)!](https://datadm.approx.dev/new)* ⇐
+### ⇒ *[Try it now! Hosted public environment is live! (Click Here)](https://datadm.approx.dev/new)* ⇐
 Don't put any sensitive data in the public environment, use the docker image or colab notebook for your private conversations ;)
 
 ### Join our [discord](https://discord.gg/kW9nBQErGe) to join the community and share your thoughts!
