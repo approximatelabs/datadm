@@ -20,6 +20,11 @@ dependencies = [
     "pandas",
     "sketch",
     "transformers",
+    "scikit-learn",
+    "seaborn",
+    "lxml",
+    "scipy",
+    "xgboost",
 ]
 urls = {homepage = "https://github.com/approximatelabs/datadm"}
 dynamic = ["version"]
