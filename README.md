@@ -17,6 +17,11 @@ Note: Demo above is `GPT-4`, which sends the conversation to OpenAI's API. To us
 
 ⚠️ LLMs are known to hallucinate and generate fake results. So, double-check before trusting their results blindly!
 
+### ⇒ *[Hosted public environment is live! Try it out now (Click Here)!](https://datadm.approx.dev/new)* ⇐
+Don't put any sensitive data in the public environment, use the docker image or colab notebook for your private conversations ;)
+
+### Join our [discord](https://discord.gg/kW9nBQErGe) to join the community and share your thoughts!
+
 ## Features
 - [x] Persistent Juptyer kernel backend for data manipulation during conversation
 - [x] Run entirely locally, keeping your data private
@@ -25,7 +30,7 @@ Note: Demo above is `GPT-4`, which sends the conversation to OpenAI's API. To us
 - [x] Load multiple tables directly into the chat
 - [x] Option to use OpenAI's GPT-3.5 or GPT-4 (requires API key)
 - [ ] WIP: GGML based mode (CPU only, no GPU required)
-- [ ] WIP: Rollback kernel state when undo using `criu`
+- [ ] WIP: Rollback kernel state when undo ~using `criu`~ (re-execute all cells)
 - [ ] TODO: Support for more data sources (e.g. SQL, S3, PySpark etc.)
 - [ ] TODO: Export a conversation as a notebook or html
 
@@ -47,7 +52,7 @@ docker run -e OPENAI_API_KEY={{YOUR_API_KEY_HERE}} -p 7860:7860 -it ghcr.io/appr
 
 For local-mode using StarChat model (requiring a CUDA device with at least 24GB of RAM)
 ```bash
-docker run --gpus all -p 7860:7860 -it ghcr.io/approximatelabs/datadm:0.2.1-cuda
+docker run --gpus all -p 7860:7860 -it ghcr.io/approximatelabs/datadm:latest-cuda
 ```
 
 ### 2. Colab to run in the cloud

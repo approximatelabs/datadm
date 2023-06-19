@@ -1,8 +1,5 @@
 import dotenv
-import random 
-import json
 import gradio as gr
-import csv
 import requests
 
 import os
@@ -80,6 +77,13 @@ footer {display: none !important;}
 #justify_center {justify-content: center !important;}
 #load_model_button {flex-grow: 0 !important;}
 #upload_button {flex-grow: 0 !important;}
+"""
+
+posthog_default_off_analytics_script = """
+async () => {
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_xouauQgYqQd2eBqYH4rjzkGewA19JsdrGrnL04m1pSL',{api_host:'https://app.posthog.com'})
+}
 """
 
 class DataSearchResultRowComponent:
@@ -220,7 +224,7 @@ def format_items(items):
     return formatted_results
 
 
-def randomupdate(query, container):
+def searchupdate(query, container):
     results = search_code(query)
     formatted_results = format_items(results)
     container.update_values(formatted_results)
@@ -231,6 +235,7 @@ with gr.Blocks(
     theme=gr.themes.Soft(),
     css=css,
     analytics_enabled=False,
+    title="DataDM"
 ) as demo:
     repl = gr.State(None)
     files = []
@@ -304,9 +309,13 @@ with gr.Blocks(
             with gr.Column():
                 results.extend(container.value.gradio_gen(upload_magic_thens))
     
+    # Run analytics tracking javascript only if in analytics tracking mode (default is off)
+    if os.environ.get("ANALYTICS_TRACKING", "0") == "1":
+        demo.load(None, None, None, _js=posthog_default_off_analytics_script)
+
     # Search Blocks
-    query.submit(randomupdate, [query, container], results)
-    search.click(randomupdate, [query, container], results)
+    query.submit(searchupdate, [query, container], results)
+    search.click(searchupdate, [query, container], results)
         
     # Setup Blocks
     demo.load(lambda: gr.Button.update(visible=False), None, load_model
