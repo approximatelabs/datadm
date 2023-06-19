@@ -7,7 +7,7 @@
 
 ![dataDM](datadm-header.png?raw=true)
 
-DataDM is your private data assistant. A conversational interface for your data where you can load, clean, transform, and visualize without a single line of code. DataDM is open source and can be run entirely locally, keeping your juicy data secrets fully private. Slide into your data's DMs tonight.
+DataDM is your private data assistant. A conversational interface for your data where you can load, clean, transform, and visualize without a single line of code. DataDM is open source and can be run entirely locally, keeping your juicy data secrets fully private.
 
 ## Demo
 
@@ -18,7 +18,7 @@ Note: Demo above is `GPT-4`, which sends the conversation to OpenAI's API. To us
 ⚠️ LLMs are known to hallucinate and generate fake results. So, double-check before trusting their results blindly!
 
 ### ⇒ *[Try it now! Hosted public environment is live! (Click Here)](https://datadm.approx.dev/new)* ⇐
-Don't put any sensitive data in the public environment, use the docker image or colab notebook for your private conversations ;)
+Don't put any sensitive data in the public environment, use the docker image or colab notebook for your private conversations.
 
 ### Join our [discord](https://discord.gg/kW9nBQErGe) to join the community and share your thoughts!
 
@@ -28,6 +28,7 @@ Don't put any sensitive data in the public environment, use the docker image or 
 - [x] Natural language chat, visualizations/plots, and direct download of data assets
 - [x] Easy to use docker-images for one-line deployment
 - [x] Load multiple tables directly into the chat
+- [x] Search for data and load CSVs directly from github
 - [x] Option to use OpenAI's GPT-3.5 or GPT-4 (requires API key)
 - [ ] WIP: GGML based mode (CPU only, no GPU required)
 - [ ] WIP: Rollback kernel state when undo ~using `criu`~ (re-execute all cells)
