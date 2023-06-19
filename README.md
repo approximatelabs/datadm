@@ -52,7 +52,7 @@ docker run -e OPENAI_API_KEY={{YOUR_API_KEY_HERE}} -p 7860:7860 -it ghcr.io/appr
 
 For local-mode using StarChat model (requiring a CUDA device with at least 24GB of RAM)
 ```bash
-docker run --gpus all -p 7860:7860 -it ghcr.io/approximatelabs/datadm:0.2.1-cuda
+docker run --gpus all -p 7860:7860 -it ghcr.io/approximatelabs/datadm:latest-cuda
 ```
 
 ### 2. Colab to run in the cloud
