@@ -14,7 +14,7 @@ classifiers = [
 ]
 dependencies = [
     "gradio",
-    "guidance==0.0.61",
+    "guidance==0.0.64",
     "jupyter",
     "matplotlib",
     "pandas",
