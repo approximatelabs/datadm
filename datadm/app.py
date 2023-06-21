@@ -208,7 +208,7 @@ def format_items(items):
             for line in response.iter_lines():
                 if lines_count >= 3:
                     break
-                content += line.decode('utf-8') + "\n"
+                content += line.decode('utf-8', errors="ignore") + "\n"
                 lines_count += 1
         else:
             content = ""
