@@ -28,22 +28,23 @@ class StarChat(guidance.llms.Transformers):
 
 
 class BackendLLMManager():
+    OPENAI_MODELS = ['gpt-4', 'gpt-4-32k', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k']
+
     def __init__(self):
         self.llms = {}
         if local_available:
             self.llms['starchat-alpha-cuda'] = {'state': 'unloaded', 'llm': None, 'mode': 'cuda', 'model_path': 'HuggingFaceH4/starchat-alpha', 'revision': '5058bd8557100137ade3c459bfc8100e90f71ec7'}
             self.llms['starchat-beta-cuda'] = {'state': 'unloaded', 'llm': None, 'mode': 'cuda', 'model_path': 'HuggingFaceH4/starchat-beta', 'revision': 'b1bcda690655777373f57ea6614eb095ec2c886f'}
-        self.llms['gpt-3.5-turbo'] = {'state': 'unloaded', 'llm': None, 'mode': 'api'}
-        self.llms['gpt-3.5-turbo-16k'] = {'state': 'unloaded', 'llm': None, 'mode': 'api'}
-        self.llms['gpt-4'] = {'state': 'unloaded', 'llm': None, 'mode': 'api'}
-        self.llms['gpt-4-32k'] = {'state': 'unloaded', 'llm': None, 'mode': 'api'}
+        
+        for model_name in self.OPENAI_MODELS:
+            self.llms[model_name] = {'state': 'unloaded', 'llm': None, 'mode': 'api'}
 
     def load(self, llm_name):
         if self.llms[llm_name]['state'] == 'unloaded':
             self.llms[llm_name]['state'] = 'loading'
             if llm_name in ['starchat-alpha-cuda', 'starchat-beta-cuda']:
                 self.llms[llm_name]['llm'] = StarChat(**self.llms[llm_name])
-            elif llm_name in ['gpt-4', 'gpt-4-32k', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k']:
+            elif llm_name in self.OPENAI_MODELS:
                 if 'OPENAI_API_KEY' not in os.environ:
                     self.llms[llm_name]['state'] = 'error'
                     raise RuntimeError("OPENAI_API_KEY not found in environment")
