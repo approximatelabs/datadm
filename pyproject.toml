@@ -21,6 +21,7 @@ dependencies = [
     "sketch",
     "transformers",
     "scikit-learn",
+    "safetensors==0.3.2",
     "seaborn",
     "lxml",
     "scipy",
